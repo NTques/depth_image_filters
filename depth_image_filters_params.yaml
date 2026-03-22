@@ -1,0 +1,53 @@
+depth_image_filters:
+  filter_chains:
+    type: string_array
+    default_value: []
+    description: "Active filter list, applied in order"
+    validation:
+      subset_of<>: [["crop_filter", "range_filter"]]
+
+  crop_filter:
+    margin_type:
+      type: string
+      default_value: "pixel"
+      description: "Margin unit: 'pixel' or 'ratio'"
+      validation:
+        one_of<>: [["pixel", "ratio"]]
+    top:
+      type: double
+      default_value: 0.0
+      description: "Top margin (px or ratio)"
+      validation:
+        gt_eq<>: [0.0]
+    bottom:
+      type: double
+      default_value: 0.0
+      description: "Bottom margin (px or ratio)"
+      validation:
+        gt_eq<>: [0.0]
+    left:
+      type: double
+      default_value: 0.0
+      description: "Left margin (px or ratio)"
+      validation:
+        gt_eq<>: [0.0]
+    right:
+      type: double
+      default_value: 0.0
+      description: "Right margin (px or ratio)"
+      validation:
+        gt_eq<>: [0.0]
+
+  range_filter:
+    min_distance:
+      type: double
+      default_value: 0.0
+      description: "Minimum valid distance in meters (closer pixels set to NaN)"
+      validation:
+        gt_eq<>: [0.0]
+    max_distance:
+      type: double
+      default_value: 10.0
+      description: "Maximum valid distance in meters (farther pixels set to NaN)"
+      validation:
+        gt<>: [0.0]

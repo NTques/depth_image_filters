@@ -1,10 +1,44 @@
 depth_image_filters:
+  depth_image_publisher:
+    enable:
+      type: bool
+      default_value: true
+      description: "Whether to publish filtered depth image"
+
+  scan_publisher:
+    enable:
+      type: bool
+      default_value: false
+      description: "Whether to publish LaserScan from filtered depth image"
+    scan_time:
+      type: double
+      default_value: 0.033
+      description: "Time between scans [seconds]"
+      validation:
+        gt<>: [0.0]
+    range_min:
+      type: double
+      default_value: 0.1
+      description: "Minimum laser range [meters]"
+      validation:
+        gt_eq<>: [0.0]
+    range_max:
+      type: double
+      default_value: 10.0
+      description: "Maximum laser range [meters]"
+      validation:
+        gt<>: [0.0]
+    output_frame_id:
+      type: string
+      default_value: ""
+      description: "Output frame_id for LaserScan (empty = use depth frame)"
+
   filter_chains:
     type: string_array
     default_value: []
     description: "Active filter list, applied in order"
     validation:
-      subset_of<>: [["crop_filter", "range_filter"]]
+      subset_of<>: [["crop_filter", "range_filter", "height_filter", "speckle_filter", "median_filter"]]
 
   crop_filter:
     margin_type:
@@ -51,3 +85,39 @@ depth_image_filters:
       description: "Maximum valid distance in meters (farther pixels set to NaN)"
       validation:
         gt<>: [0.0]
+
+  height_filter:
+    min_height:
+      type: double
+      default_value: -1.0
+      description: "Minimum valid height in meters (z-axis in target frame)"
+    max_height:
+      type: double
+      default_value: 2.0
+      description: "Maximum valid height in meters (z-axis in target frame)"
+    target_frame:
+      type: string
+      default_value: "base_link"
+      description: "Reference frame for height calculation"
+
+  speckle_filter:
+    max_speckle_size:
+      type: int
+      default_value: 100
+      description: "Maximum blob size (in pixels) to be considered speckle noise"
+      validation:
+        gt<>: [0]
+    max_diff:
+      type: double
+      default_value: 0.1
+      description: "Maximum depth difference between adjacent pixels in a blob (meters for 32FC1, mm-equivalent for 16UC1)"
+      validation:
+        gt<>: [0.0]
+
+  median_filter:
+    kernel_size:
+      type: int
+      default_value: 5
+      description: "Median filter kernel size (must be odd and >= 3)"
+      validation:
+        gt_eq<>: [3]

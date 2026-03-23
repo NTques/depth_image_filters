@@ -1,0 +1,48 @@
+depth_image_filter_node:
+  ros__parameters:
+    # --- Depth image publisher ---
+    depth_image_publisher:
+      enable: true
+
+    # --- LaserScan publisher ---
+    scan_publisher:
+      enable: false
+      scan_time: 0.033
+      range_min: 0.1
+      range_max: 10.0
+      output_frame_id: ""
+
+    # --- Filter chain (applied in order) ---
+    # Available: crop_filter, range_filter, height_filter, speckle_filter, median_filter
+    filter_chains:
+      - range_filter
+      - speckle_filter
+      - median_filter
+
+    # --- Range filter ---
+    range_filter:
+      min_distance: 0.3
+      max_distance: 5.0
+
+    # --- Crop filter ---
+    crop_filter:
+      margin_type: "pixel"   # "pixel" or "ratio"
+      top: 0.0
+      bottom: 0.0
+      left: 0.0
+      right: 0.0
+
+    # --- Height filter ---
+    height_filter:
+      min_height: -0.1
+      max_height: 2.0
+      target_frame: "base_link"
+
+    # --- Speckle filter ---
+    speckle_filter:
+      max_speckle_size: 100
+      max_diff: 0.1
+
+    # --- Median filter ---
+    median_filter:
+      kernel_size: 5

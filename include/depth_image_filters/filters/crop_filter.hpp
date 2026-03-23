@@ -8,17 +8,16 @@
 #include "depth_image_filters/filters/depth_filter_base.hpp"
 #include <opencv2/core.hpp>
 
-namespace depth_image_filters
-{
-    class CropFilter : public DepthFilterBase
-    {
-    public:
-        explicit CropFilter();
-        bool apply(cv::Mat& image, const std::string& encoding) override;
+namespace depth_image_filters {
+class CropFilter : public DepthFilterBase {
+public:
+  explicit CropFilter();
+  bool apply(cv::Mat &image, const std::string &encoding,
+             const sensor_msgs::msg::CameraInfo &camera_info) override;
 
-    private:
-        cv::Rect computeCropRect(int img_width, int img_height) const;
-        bool validateRect(const cv::Rect& rect, int img_width, int img_height) const;
-    };
+private:
+  cv::Rect computeCropRect(int img_width, int img_height) const;
+  bool validateRect(const cv::Rect &rect, int img_width, int img_height) const;
+};
 } // namespace depth_image_filters
-#endif //DEPTH_IMAGE_FILTERS_CROP_FILTER_HPP
+#endif // DEPTH_IMAGE_FILTERS_CROP_FILTER_HPP

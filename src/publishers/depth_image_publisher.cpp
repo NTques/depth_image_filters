@@ -10,7 +10,7 @@ DepthImagePublisher::DepthImagePublisher()
     : PublisherBase("depth_image_publisher") {}
 
 void DepthImagePublisher::setup(rclcpp::Node *node, const Params &/*params*/) {
-  pub_ = image_transport::create_publisher(node, "~/output/depth");
+  pub_ = image_transport::create_publisher(node, "camera/depth/filtered_image");
 }
 
 void DepthImagePublisher::publish(

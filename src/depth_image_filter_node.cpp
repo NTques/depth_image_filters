@@ -91,7 +91,7 @@ private:
 
   void setupSubscribers() {
     camera_info_sub_ = this->create_subscription<sensor_msgs::msg::CameraInfo>(
-        "~/input/camera_info", rclcpp::SensorDataQoS(),
+        "camera/depth/camera_info", rclcpp::SensorDataQoS(),
         [this](sensor_msgs::msg::CameraInfo::ConstSharedPtr msg) {
           std::lock_guard<std::mutex> lock(camera_info_mutex_);
           latest_camera_info_ = *msg;
@@ -99,7 +99,7 @@ private:
         });
 
     depth_sub_ = image_transport::create_subscription(
-        this, "~/input/depth",
+        this, "camera/depth/image_rect_raw",
         std::bind(&DepthImageFilterNode::depthCallback, this,
                   std::placeholders::_1),
         "raw", rmw_qos_profile_sensor_data);

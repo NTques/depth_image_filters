@@ -34,10 +34,6 @@ def generate_launch_description():
         executable='depth_image_filter_node',
         name='depth_image_filter_node',
         parameters=[LaunchConfiguration('params_file')],
-        remappings=[
-            ('~/input/depth', LaunchConfiguration('depth_topic')),
-            ('~/input/camera_info', LaunchConfiguration('camera_info_topic')),
-        ],
         output='screen',
     )
 

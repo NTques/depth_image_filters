@@ -17,7 +17,7 @@ LaserScanPublisher::LaserScanPublisher()
 
 void LaserScanPublisher::setup(rclcpp::Node *node, const Params &/*params*/) {
   pub_ = node->create_publisher<sensor_msgs::msg::LaserScan>(
-      "~/output/scan", rclcpp::SensorDataQoS());
+      "camera/depth/scan", rclcpp::SensorDataQoS());
 }
 
 void LaserScanPublisher::publish(

@@ -1,4 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp_components/register_node_macro.hpp>
 #include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <tf2_ros/buffer.h>
@@ -163,11 +164,4 @@ private:
 
 } // namespace depth_image_filters
 
-int main(int argc, char **argv) {
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<depth_image_filters::DepthImageFilterNode>(
-      rclcpp::NodeOptions());
-  rclcpp::spin(node);
-  rclcpp::shutdown();
-  return 0;
-}
+RCLCPP_COMPONENTS_REGISTER_NODE(depth_image_filters::DepthImageFilterNode)

@@ -57,13 +57,17 @@ bool MedianFilter::apply(cv::Mat &image, const std::string &encoding,
     // Restore NaN for originally invalid pixels
     image.setTo(nan, nan_mask);
   } else {
-    // 16UC1: medianBlur works directly, 0-valued pixels are treated as invalid
+    // 16UC1: convert to float, apply median, convert back
     cv::Mat zero_mask;
     cv::compare(image, 0, zero_mask, cv::CMP_EQ);
 
-    cv::medianBlur(image, image, ksize);
+    cv::Mat float_img;
+    image.convertTo(float_img, CV_32F);
+    float_img.setTo(0.0f, zero_mask);
 
-    // Restore 0 for originally invalid pixels
+    cv::medianBlur(float_img, float_img, ksize);
+
+    float_img.convertTo(image, CV_16U);
     image.setTo(0, zero_mask);
   }
 

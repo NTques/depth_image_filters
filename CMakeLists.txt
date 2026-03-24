@@ -16,7 +16,6 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(rclcpp_components REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 
 generate_parameter_library(
@@ -24,11 +23,9 @@ generate_parameter_library(
     depth_image_filters_params.yaml
 )
 
-set(COMPONENT_NAME depth_image_filter_component)
 set(EXECUTABLE_NAME depth_image_filter_node)
 set(DEPENDENCIES
     rclcpp
-    rclcpp_components
     sensor_msgs
     std_msgs
     image_transport
@@ -40,8 +37,7 @@ set(DEPENDENCIES
     tf2_geometry_msgs
 )
 
-# Shared library (component)
-add_library(${COMPONENT_NAME} SHARED
+add_executable(${EXECUTABLE_NAME}
     src/depth_image_filter_node.cpp
     src/filters/depth_filter_base.cpp
     src/filters/crop_filter.cpp
@@ -49,29 +45,25 @@ add_library(${COMPONENT_NAME} SHARED
     src/filters/height_filter.cpp
     src/filters/speckle_filter.cpp
     src/filters/median_filter.cpp
+    src/filters/bilateral_filter.cpp
+    src/filters/temporal_filter.cpp
     src/filter_chain.cpp
     src/publishers/publisher_base.cpp
     src/publishers/depth_image_publisher.cpp
     src/publishers/laser_scan_publisher.cpp)
-target_include_directories(${COMPONENT_NAME} PUBLIC
+target_include_directories(${EXECUTABLE_NAME} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
-target_compile_features(${COMPONENT_NAME} PUBLIC c_std_99 cxx_std_17)
-ament_target_dependencies(${COMPONENT_NAME}
+target_compile_features(${EXECUTABLE_NAME} PUBLIC c_std_99 cxx_std_17)
+ament_target_dependencies(${EXECUTABLE_NAME}
     ${DEPENDENCIES}
 )
-target_link_libraries(${COMPONENT_NAME}
+target_link_libraries(${EXECUTABLE_NAME}
     depth_image_filters_parameters
 )
-rclcpp_components_register_node(${COMPONENT_NAME}
-    PLUGIN "depth_image_filters::DepthImageFilterNode"
-    EXECUTABLE ${EXECUTABLE_NAME}
-)
 
-install(TARGETS ${COMPONENT_NAME}
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
+install(TARGETS ${EXECUTABLE_NAME}
+    DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY config launch
     DESTINATION share/${PROJECT_NAME})
@@ -86,6 +78,8 @@ if(BUILD_TESTING)
       src/filters/height_filter.cpp
       src/filters/speckle_filter.cpp
       src/filters/median_filter.cpp
+    src/filters/bilateral_filter.cpp
+      src/filters/temporal_filter.cpp
   )
 
   ament_add_gtest(test_range_filter test/test_range_filter.cpp ${FILTER_SOURCES})

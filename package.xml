@@ -11,7 +11,6 @@
   <buildtool_depend>generate_parameter_library</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <depend>rclcpp_components</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>image_transport</depend>

@@ -66,7 +66,9 @@ void LaserScanPublisher::publish(
     cv::Mat sanitized;
     image.copyTo(sanitized);
     sanitized.setTo(std::numeric_limits<uint16_t>::max(), sanitized == 0);
-    cv::reduce(sanitized, col_min, 0, cv::REDUCE_MIN, CV_32F);
+    cv::Mat sanitized_f;
+    sanitized.convertTo(sanitized_f, CV_32F);
+    cv::reduce(sanitized_f, col_min, 0, cv::REDUCE_MIN, CV_32F);
     col_min /= 1000.0f;
   }
 

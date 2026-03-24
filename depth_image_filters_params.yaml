@@ -38,7 +38,7 @@ depth_image_filters:
     default_value: []
     description: "Active filter list, applied in order"
     validation:
-      subset_of<>: [["crop_filter", "range_filter", "height_filter", "speckle_filter", "median_filter"]]
+      subset_of<>: [["crop_filter", "range_filter", "height_filter", "speckle_filter", "median_filter", "bilateral_filter", "temporal_filter"]]
 
   crop_filter:
     margin_type:
@@ -121,3 +121,29 @@ depth_image_filters:
       description: "Median filter kernel size (must be odd and >= 3)"
       validation:
         gt_eq<>: [3]
+
+  bilateral_filter:
+    diameter:
+      type: int
+      default_value: 5
+      description: "Pixel neighborhood diameter (-1 for auto from sigma_space)"
+    sigma_color:
+      type: double
+      default_value: 25.0
+      description: "Filter sigma in the color/depth space (larger = mix farther depth values)"
+      validation:
+        gt<>: [0.0]
+    sigma_space:
+      type: double
+      default_value: 25.0
+      description: "Filter sigma in the coordinate space (larger = farther pixels influence)"
+      validation:
+        gt<>: [0.0]
+
+  temporal_filter:
+    buffer_size:
+      type: int
+      default_value: 5
+      description: "Number of frames to buffer for temporal median"
+      validation:
+        gt_eq<>: [2]

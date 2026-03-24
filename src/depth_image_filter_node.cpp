@@ -1,5 +1,4 @@
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp_components/register_node_macro.hpp>
 #include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <tf2_ros/buffer.h>
@@ -13,6 +12,8 @@
 #include "depth_image_filters/filters/height_filter.hpp"
 #include "depth_image_filters/filters/speckle_filter.hpp"
 #include "depth_image_filters/filters/median_filter.hpp"
+#include "depth_image_filters/filters/bilateral_filter.hpp"
+#include "depth_image_filters/filters/temporal_filter.hpp"
 #include "depth_image_filters/publishers/publisher_base.hpp"
 #include "depth_image_filters/publishers/depth_image_publisher.hpp"
 #include "depth_image_filters/publishers/laser_scan_publisher.hpp"
@@ -59,6 +60,10 @@ private:
         filter = std::make_shared<SpeckleFilter>();
       } else if (name == "median_filter") {
         filter = std::make_shared<MedianFilter>();
+      } else if (name == "bilateral_filter") {
+        filter = std::make_shared<BilateralFilter>();
+      } else if (name == "temporal_filter") {
+        filter = std::make_shared<TemporalFilter>();
       } else {
         RCLCPP_WARN(get_logger(), "Unknown filter: %s", name.c_str());
         continue;
@@ -164,4 +169,11 @@ private:
 
 } // namespace depth_image_filters
 
-RCLCPP_COMPONENTS_REGISTER_NODE(depth_image_filters::DepthImageFilterNode)
+int main(int argc, char **argv) {
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<depth_image_filters::DepthImageFilterNode>(
+      rclcpp::NodeOptions());
+  rclcpp::spin(node);
+  rclcpp::shutdown();
+  return 0;
+}

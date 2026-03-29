@@ -11,7 +11,7 @@ namespace depth_image_filters {
 TemporalFilter::TemporalFilter() : DepthFilterBase("temporal_filter") {}
 
 bool TemporalFilter::apply(cv::Mat &image, const std::string &encoding,
-                           const sensor_msgs::msg::CameraInfo & /*camera_info*/) {
+                           sensor_msgs::msg::CameraInfo & /*camera_info*/) {
   const auto &p = params_cache_.temporal_filter;
   const int buffer_size = static_cast<int>(p.buffer_size);
 

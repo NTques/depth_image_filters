@@ -1,12 +1,19 @@
 depth_image_filter_node:
   ros__parameters:
+    # --- Input topics ---
+    image_topic: "camera/depth/image_rect_raw"
+    camera_info_topic: "camera/depth/camera_info"
+
     # --- Depth image publisher ---
     depth_image_publisher:
       enable: true
+      image_topic: "camera/depth/filtered_image"
+      camera_info_topic: "camera/depth/filtered_camera_info"
 
     # --- LaserScan publisher ---
     scan_publisher:
       enable: false
+      topic: "camera/depth/scan"
       scan_time: 0.033
       range_min: 0.1
       range_max: 10.0

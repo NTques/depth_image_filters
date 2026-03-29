@@ -8,7 +8,7 @@
 
 #include "depth_image_filters/filters/median_filter.hpp"
 
-static const sensor_msgs::msg::CameraInfo kEmptyCameraInfo;
+static sensor_msgs::msg::CameraInfo kEmptyCameraInfo;
 
 class MedianFilterTest : public ::testing::Test {
 protected:

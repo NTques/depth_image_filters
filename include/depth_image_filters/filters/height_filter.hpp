@@ -20,7 +20,7 @@ public:
                   std::shared_ptr<tf2_ros::Buffer> tf_buffer);
 
   bool apply(cv::Mat &image, const std::string &encoding,
-             const sensor_msgs::msg::CameraInfo &camera_info) override;
+             sensor_msgs::msg::CameraInfo &camera_info) override;
 
 private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

@@ -18,7 +18,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <random>
 
-static const sensor_msgs::msg::CameraInfo kEmptyCameraInfo;
+static sensor_msgs::msg::CameraInfo kEmptyCameraInfo;
 
 namespace fs = std::filesystem;
 

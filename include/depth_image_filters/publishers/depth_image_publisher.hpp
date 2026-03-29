@@ -22,6 +22,7 @@ public:
 
 private:
   image_transport::Publisher pub_;
+  rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_pub_;
 };
 
 } // namespace depth_image_filters

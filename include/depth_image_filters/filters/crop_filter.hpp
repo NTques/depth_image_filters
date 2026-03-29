@@ -13,7 +13,7 @@ class CropFilter : public DepthFilterBase {
 public:
   explicit CropFilter();
   bool apply(cv::Mat &image, const std::string &encoding,
-             const sensor_msgs::msg::CameraInfo &camera_info) override;
+             sensor_msgs::msg::CameraInfo &camera_info) override;
 
 private:
   cv::Rect computeCropRect(int img_width, int img_height) const;

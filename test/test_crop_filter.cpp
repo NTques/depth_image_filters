@@ -6,7 +6,7 @@
 
 #include "depth_image_filters/filters/crop_filter.hpp"
 
-static const sensor_msgs::msg::CameraInfo kEmptyCameraInfo;
+static sensor_msgs::msg::CameraInfo kEmptyCameraInfo;
 
 class CropFilterTest : public ::testing::Test {
 protected:

@@ -15,9 +15,9 @@ namespace depth_image_filters {
 LaserScanPublisher::LaserScanPublisher()
     : PublisherBase("laser_scan_publisher") {}
 
-void LaserScanPublisher::setup(rclcpp::Node *node, const Params &/*params*/) {
+void LaserScanPublisher::setup(rclcpp::Node *node, const Params &params) {
   pub_ = node->create_publisher<sensor_msgs::msg::LaserScan>(
-      "camera/depth/scan", rclcpp::SensorDataQoS());
+      params.scan_publisher.topic, rclcpp::SensorDataQoS());
 }
 
 void LaserScanPublisher::publish(

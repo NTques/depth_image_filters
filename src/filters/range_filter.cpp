@@ -11,7 +11,7 @@ namespace depth_image_filters {
 RangeFilter::RangeFilter() : DepthFilterBase("range_filter") {}
 
 bool RangeFilter::apply(cv::Mat &image, const std::string &encoding,
-                        const sensor_msgs::msg::CameraInfo &/*camera_info*/) {
+                        sensor_msgs::msg::CameraInfo &/*camera_info*/) {
   const auto &p = params_cache_.range_filter;
 
   if (p.min_distance >= p.max_distance) {

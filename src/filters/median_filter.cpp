@@ -13,7 +13,7 @@ namespace depth_image_filters {
 MedianFilter::MedianFilter() : DepthFilterBase("median_filter") {}
 
 bool MedianFilter::apply(cv::Mat &image, const std::string &encoding,
-                         const sensor_msgs::msg::CameraInfo & /*camera_info*/) {
+                         sensor_msgs::msg::CameraInfo & /*camera_info*/) {
   const auto &p = params_cache_.median_filter;
   int ksize = static_cast<int>(p.kernel_size);
 

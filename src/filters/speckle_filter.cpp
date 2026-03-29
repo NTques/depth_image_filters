@@ -13,7 +13,7 @@ namespace depth_image_filters {
 SpeckleFilter::SpeckleFilter() : DepthFilterBase("speckle_filter") {}
 
 bool SpeckleFilter::apply(cv::Mat &image, const std::string &encoding,
-                          const sensor_msgs::msg::CameraInfo & /*camera_info*/) {
+                          sensor_msgs::msg::CameraInfo & /*camera_info*/) {
   const auto &p = params_cache_.speckle_filter;
 
   const bool is_float =

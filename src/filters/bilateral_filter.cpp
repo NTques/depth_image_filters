@@ -10,7 +10,7 @@ namespace depth_image_filters {
 BilateralFilter::BilateralFilter() : DepthFilterBase("bilateral_filter") {}
 
 bool BilateralFilter::apply(cv::Mat &image, const std::string &encoding,
-                            const sensor_msgs::msg::CameraInfo & /*camera_info*/) {
+                            sensor_msgs::msg::CameraInfo & /*camera_info*/) {
   const auto &p = params_cache_.bilateral_filter;
   const int d = static_cast<int>(p.diameter);
   const double sigma_color = p.sigma_color;

@@ -14,7 +14,7 @@ namespace depth_image_filters
     }
 
     bool FilterChain::apply(const sensor_msgs::msg::Image::ConstSharedPtr& input,
-                            const sensor_msgs::msg::CameraInfo& camera_info,
+                            sensor_msgs::msg::CameraInfo& camera_info,
                             sensor_msgs::msg::Image::SharedPtr& output)
     {
         if (filters_.empty())

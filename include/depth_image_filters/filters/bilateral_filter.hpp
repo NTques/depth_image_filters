@@ -8,7 +8,7 @@ class BilateralFilter : public DepthFilterBase {
 public:
   explicit BilateralFilter();
   bool apply(cv::Mat &image, const std::string &encoding,
-             const sensor_msgs::msg::CameraInfo &camera_info) override;
+             sensor_msgs::msg::CameraInfo &camera_info) override;
 };
 } // namespace depth_image_filters
 

@@ -9,7 +9,7 @@ class TemporalFilter : public DepthFilterBase {
 public:
   explicit TemporalFilter();
   bool apply(cv::Mat &image, const std::string &encoding,
-             const sensor_msgs::msg::CameraInfo &camera_info) override;
+             sensor_msgs::msg::CameraInfo &camera_info) override;
 
 private:
   std::deque<cv::Mat> buffer_;

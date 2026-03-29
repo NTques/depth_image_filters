@@ -46,7 +46,7 @@ bool CropFilter::validateRect(const cv::Rect &rect, int img_width,
 }
 
 bool CropFilter::apply(cv::Mat &image, const std::string &encoding,
-                       const sensor_msgs::msg::CameraInfo &/*camera_info*/) {
+                       sensor_msgs::msg::CameraInfo &camera_info) {
   const cv::Rect crop_rect = computeCropRect(image.cols, image.rows);
 
   if (!validateRect(crop_rect, image.cols, image.rows)) {
@@ -54,6 +54,28 @@ bool CropFilter::apply(cv::Mat &image, const std::string &encoding,
   }
 
   image = image(crop_rect).clone();
+
+  // Update camera_info to reflect cropped image dimensions
+  const double cx = camera_info.k[2] - crop_rect.x;
+  const double cy = camera_info.k[5] - crop_rect.y;
+
+  // K matrix: [fx, 0, cx; 0, fy, cy; 0, 0, 1]
+  camera_info.k[2] = cx;
+  camera_info.k[5] = cy;
+
+  // P matrix: [fx, 0, cx, Tx; 0, fy, cy, Ty; 0, 0, 1, 0]
+  camera_info.p[2] = cx;
+  camera_info.p[6] = cy;
+
+  camera_info.width = crop_rect.width;
+  camera_info.height = crop_rect.height;
+
+  // Set ROI to reflect the crop within the original full resolution image
+  camera_info.roi.x_offset += crop_rect.x;
+  camera_info.roi.y_offset += crop_rect.y;
+  camera_info.roi.width = crop_rect.width;
+  camera_info.roi.height = crop_rect.height;
+
   return true;
 }
 } // namespace depth_image_filters

@@ -21,7 +21,7 @@ void HeightFilter::initialize(
 }
 
 bool HeightFilter::apply(cv::Mat &image, const std::string &encoding,
-                         const sensor_msgs::msg::CameraInfo &camera_info) {
+                         sensor_msgs::msg::CameraInfo &camera_info) {
   if (!tf_buffer_) {
     RCLCPP_ERROR(logger_, "TF buffer not set. Use initialize(param_listener, tf_buffer).");
     return false;

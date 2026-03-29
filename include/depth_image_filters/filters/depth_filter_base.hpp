@@ -23,7 +23,7 @@ public:
 
   virtual void initialize(const std::shared_ptr<ParamListener> &param_listener);
   virtual bool apply(cv::Mat &image, const std::string &encoding,
-                     const sensor_msgs::msg::CameraInfo &camera_info) = 0;
+                     sensor_msgs::msg::CameraInfo &camera_info) = 0;
 
   void update_params();
 

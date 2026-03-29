@@ -26,7 +26,11 @@ void LaserScanPublisher::publish(
     const Params &params) {
   const auto &s = params.scan_publisher;
 
-  camera_model_.fromCameraInfo(camera_info);
+  if (camera_info.k != last_camera_info_.k || camera_info.p != last_camera_info_.p) {
+    camera_model_.fromCameraInfo(camera_info);
+    last_camera_info_ = camera_info;
+    cached_cols_ = 0;  // invalidate cos cache
+  }
 
   cv_bridge::CvImageConstPtr cv_depth;
   try {
@@ -53,22 +57,21 @@ void LaserScanPublisher::publish(
       (cv_depth->encoding == sensor_msgs::image_encodings::TYPE_32FC1);
 
   if (is_float) {
-    cv::Mat sanitized;
-    image.copyTo(sanitized);
-    const float inf = std::numeric_limits<float>::infinity();
-    sanitized.forEach<float>([&](float &px, const int[]) {
-      if (!std::isfinite(px) || px <= 0.0f) {
-        px = inf;
-      }
-    });
+    // Replace invalid pixels with inf using mask, avoiding full copy+forEach
+    const float inf_val = std::numeric_limits<float>::infinity();
+    cv::Mat valid_mask;
+    // finite and positive: use range check (NaN/inf fail range checks)
+    cv::inRange(image, cv::Scalar(std::numeric_limits<float>::min()),
+                cv::Scalar(std::numeric_limits<float>::max()), valid_mask);
+    cv::Mat sanitized = cv::Mat(image.size(), CV_32F, cv::Scalar(inf_val));
+    image.copyTo(sanitized, valid_mask);
     cv::reduce(sanitized, col_min, 0, cv::REDUCE_MIN, CV_32F);
   } else {
+    // Replace 0 with max using mask, then reduce directly in uint16
     cv::Mat sanitized;
     image.copyTo(sanitized);
     sanitized.setTo(std::numeric_limits<uint16_t>::max(), sanitized == 0);
-    cv::Mat sanitized_f;
-    sanitized.convertTo(sanitized_f, CV_32F);
-    cv::reduce(sanitized_f, col_min, 0, cv::REDUCE_MIN, CV_32F);
+    cv::reduce(sanitized, col_min, 0, cv::REDUCE_MIN, CV_32F);
     col_min /= 1000.0f;
   }
 
@@ -93,6 +96,16 @@ void LaserScanPublisher::publish(
   scan->range_min = static_cast<float>(s.range_min);
   scan->range_max = static_cast<float>(s.range_max);
 
+  // Pre-compute cos(theta) per column (cached across frames)
+  if (cached_cols_ != cols) {
+    cos_theta_cache_.resize(cols);
+    for (int c = 0; c < cols; ++c) {
+      const double theta = std::atan2(static_cast<double>(c) - cx, fx);
+      cos_theta_cache_[c] = static_cast<float>(std::cos(theta));
+    }
+    cached_cols_ = cols;
+  }
+
   scan->ranges.resize(cols);
   const float range_min_f = scan->range_min;
   const float range_max_f = scan->range_max;
@@ -101,10 +114,7 @@ void LaserScanPublisher::publish(
   const float *min_row = col_min.ptr<float>(0);
   for (int c = 0; c < cols; ++c) {
     const int scan_idx = cols - 1 - c;
-    const float depth = min_row[c];
-
-    const double theta = std::atan2(static_cast<double>(c) - cx, fx);
-    const float range = static_cast<float>(depth / std::cos(theta));
+    const float range = min_row[c] / cos_theta_cache_[c];
 
     if (std::isfinite(range) && range >= range_min_f && range <= range_max_f) {
       scan->ranges[scan_idx] = range;

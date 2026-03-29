@@ -86,39 +86,49 @@ bool HeightFilter::apply(cv::Mat &image, const std::string &encoding,
   const double min_h = p.min_height;
   const double max_h = p.max_height;
 
+  // Pre-combine rotation coefficients with intrinsics to eliminate per-pixel divisions
+  // height = (r20/fx*(col-cx) + r21/fy*(row-cy) + r22) * d + tz
+  const double coeff_x = r20 / fx;
+  const double coeff_y = r21 / fy;
+  const double coeff_z = r22;
+
   if (is_float) {
     const float nan = std::numeric_limits<float>::quiet_NaN();
 
-    image.forEach<float>([&](float &px, const int pos[]) {
-      const double d = static_cast<double>(px);
-      if (!std::isfinite(d) || d <= 0.0) return;
+    for (int row = 0; row < image.rows; ++row) {
+      auto *ptr = image.ptr<float>(row);
+      const double y_term = coeff_y * (row - cy);
+      for (int col = 0; col < image.cols; ++col) {
+        const float d = ptr[col];
+        if (!std::isfinite(d) || d <= 0.0f) continue;
 
-      const double x_cam = (pos[1] - cx) * d / fx;
-      const double y_cam = (pos[0] - cy) * d / fy;
-      const double z_cam = d;
+        const double height =
+            (coeff_x * (col - cx) + y_term + coeff_z) * d + tz;
 
-      const double height = r20 * x_cam + r21 * y_cam + r22 * z_cam + tz;
-
-      if (height < min_h || height > max_h) {
-        px = nan;
+        if (height < min_h || height > max_h) {
+          ptr[col] = nan;
+        }
       }
-    });
+    }
   } else {
-    image.forEach<uint16_t>([&](uint16_t &px, const int pos[]) {
-      if (px == 0) return;
+    constexpr double mm_to_m = 1.0 / 1000.0;
 
-      const double d = static_cast<double>(px) / 1000.0;  // mm -> m
+    for (int row = 0; row < image.rows; ++row) {
+      auto *ptr = image.ptr<uint16_t>(row);
+      const double y_term = coeff_y * (row - cy);
+      for (int col = 0; col < image.cols; ++col) {
+        if (ptr[col] == 0) continue;
 
-      const double x_cam = (pos[1] - cx) * d / fx;
-      const double y_cam = (pos[0] - cy) * d / fy;
-      const double z_cam = d;
+        const double d = static_cast<double>(ptr[col]) * mm_to_m;
 
-      const double height = r20 * x_cam + r21 * y_cam + r22 * z_cam + tz;
+        const double height =
+            (coeff_x * (col - cx) + y_term + coeff_z) * d + tz;
 
-      if (height < min_h || height > max_h) {
-        px = 0u;
+        if (height < min_h || height > max_h) {
+          ptr[col] = 0u;
+        }
       }
-    });
+    }
   }
 
   return true;

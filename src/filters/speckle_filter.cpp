@@ -36,13 +36,14 @@ bool SpeckleFilter::apply(cv::Mat &image, const std::string &encoding,
 
     cv::Mat depth_mm(image.size(), CV_16SC1);
     for (int r = 0; r < image.rows; ++r) {
+      const float *src = image.ptr<float>(r);
+      auto *dst = depth_mm.ptr<int16_t>(r);
       for (int c = 0; c < image.cols; ++c) {
-        float v = image.at<float>(r, c);
+        float v = src[c];
         if (std::isfinite(v) && v > 0.0f) {
-          depth_mm.at<int16_t>(r, c) =
-              static_cast<int16_t>(std::clamp(v * 1000.0f, -32767.0f, 32767.0f));
+          dst[c] = static_cast<int16_t>(std::clamp(v * 1000.0f, -32767.0f, 32767.0f));
         } else {
-          depth_mm.at<int16_t>(r, c) = kInvalid;
+          dst[c] = kInvalid;
         }
       }
     }
@@ -53,10 +54,11 @@ bool SpeckleFilter::apply(cv::Mat &image, const std::string &encoding,
 
     // Mark newly zeroed pixels as NaN in the original
     for (int r = 0; r < image.rows; ++r) {
+      const auto *mm = depth_mm.ptr<int16_t>(r);
+      auto *orig = image.ptr<float>(r);
       for (int c = 0; c < image.cols; ++c) {
-        if (depth_mm.at<int16_t>(r, c) == kInvalid &&
-            std::isfinite(image.at<float>(r, c))) {
-          image.at<float>(r, c) = nan;
+        if (mm[c] == kInvalid && std::isfinite(orig[c])) {
+          orig[c] = nan;
         }
       }
     }
@@ -73,9 +75,11 @@ bool SpeckleFilter::apply(cv::Mat &image, const std::string &encoding,
 
     // Map removed pixels back to 0 in original
     for (int r = 0; r < image.rows; ++r) {
+      const auto *sd = signed_depth.ptr<int16_t>(r);
+      auto *orig = image.ptr<uint16_t>(r);
       for (int c = 0; c < image.cols; ++c) {
-        if (signed_depth.at<int16_t>(r, c) == kInvalid) {
-          image.at<uint16_t>(r, c) = 0;
+        if (sd[c] == kInvalid) {
+          orig[c] = 0;
         }
       }
     }

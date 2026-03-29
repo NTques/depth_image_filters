@@ -24,6 +24,9 @@ public:
 private:
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr pub_;
   image_geometry::PinholeCameraModel camera_model_;
+  sensor_msgs::msg::CameraInfo last_camera_info_;
+  std::vector<float> cos_theta_cache_;  // pre-computed cos(theta) per column
+  int cached_cols_ = 0;
 };
 
 } // namespace depth_image_filters

@@ -57,21 +57,22 @@ void LaserScanPublisher::publish(
       (cv_depth->encoding == sensor_msgs::image_encodings::TYPE_32FC1);
 
   if (is_float) {
-    // Replace invalid pixels with inf using mask, avoiding full copy+forEach
+    cv::Mat sanitized;
+    image.copyTo(sanitized);
     const float inf_val = std::numeric_limits<float>::infinity();
-    cv::Mat valid_mask;
-    // finite and positive: use range check (NaN/inf fail range checks)
-    cv::inRange(image, cv::Scalar(std::numeric_limits<float>::min()),
-                cv::Scalar(std::numeric_limits<float>::max()), valid_mask);
-    cv::Mat sanitized = cv::Mat(image.size(), CV_32F, cv::Scalar(inf_val));
-    image.copyTo(sanitized, valid_mask);
+    sanitized.forEach<float>([&](float &px, const int[]) {
+      if (!std::isfinite(px) || px <= 0.0f) {
+        px = inf_val;
+      }
+    });
     cv::reduce(sanitized, col_min, 0, cv::REDUCE_MIN, CV_32F);
   } else {
-    // Replace 0 with max using mask, then reduce directly in uint16
     cv::Mat sanitized;
     image.copyTo(sanitized);
     sanitized.setTo(std::numeric_limits<uint16_t>::max(), sanitized == 0);
-    cv::reduce(sanitized, col_min, 0, cv::REDUCE_MIN, CV_32F);
+    cv::Mat sanitized_f;
+    sanitized.convertTo(sanitized_f, CV_32F);
+    cv::reduce(sanitized_f, col_min, 0, cv::REDUCE_MIN, CV_32F);
     col_min /= 1000.0f;
   }
 

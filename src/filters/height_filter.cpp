@@ -95,40 +95,32 @@ bool HeightFilter::apply(cv::Mat &image, const std::string &encoding,
   if (is_float) {
     const float nan = std::numeric_limits<float>::quiet_NaN();
 
-    for (int row = 0; row < image.rows; ++row) {
-      auto *ptr = image.ptr<float>(row);
-      const double y_term = coeff_y * (row - cy);
-      for (int col = 0; col < image.cols; ++col) {
-        const float d = ptr[col];
-        if (!std::isfinite(d) || d <= 0.0f) continue;
+    image.forEach<float>([&](float &px, const int pos[]) {
+      const double d = static_cast<double>(px);
+      if (!std::isfinite(d) || d <= 0.0) return;
 
-        const double height =
-            (coeff_x * (col - cx) + y_term + coeff_z) * d + tz;
+      const double height =
+          (coeff_x * (pos[1] - cx) + coeff_y * (pos[0] - cy) + coeff_z) * d + tz;
 
-        if (height < min_h || height > max_h) {
-          ptr[col] = nan;
-        }
+      if (height < min_h || height > max_h) {
+        px = nan;
       }
-    }
+    });
   } else {
     constexpr double mm_to_m = 1.0 / 1000.0;
 
-    for (int row = 0; row < image.rows; ++row) {
-      auto *ptr = image.ptr<uint16_t>(row);
-      const double y_term = coeff_y * (row - cy);
-      for (int col = 0; col < image.cols; ++col) {
-        if (ptr[col] == 0) continue;
+    image.forEach<uint16_t>([&](uint16_t &px, const int pos[]) {
+      if (px == 0) return;
 
-        const double d = static_cast<double>(ptr[col]) * mm_to_m;
+      const double d = static_cast<double>(px) * mm_to_m;
 
-        const double height =
-            (coeff_x * (col - cx) + y_term + coeff_z) * d + tz;
+      const double height =
+          (coeff_x * (pos[1] - cx) + coeff_y * (pos[0] - cy) + coeff_z) * d + tz;
 
-        if (height < min_h || height > max_h) {
-          ptr[col] = 0u;
-        }
+      if (height < min_h || height > max_h) {
+        px = 0u;
       }
-    }
+    });
   }
 
   return true;
